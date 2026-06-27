@@ -1,53 +1,71 @@
-import React from "react"
+import Link from "next/link";
 
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../../../components/ui/card"
-import { Button } from "../../../components/ui/button"
-import { Badge } from "../../../components/ui/badge"
-import { Separator } from "../../../components/ui/separator"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  getNextQuests,
+  getPrerequisiteQuests,
+  getQuestById,
+} from "@/lib/quests";
 
-type Quest = {
-  name: string
-  level: number
-  location: string
-  description?: string
-  prerequisites: string[]
-  unlocks: string[]
-  recommendations?: string[]
-}
+type QuestPageProps = {
+  params: Promise<{
+    id: string;
+  }>;
+};
 
-export default function Page({ params }: { params: { id: string } }) {
-  const quest: Quest = {
-    name: "King's Recruit",
-    level: 1,
-    location: "Ragni",
-    description:
-      "Help King Omoth recruit new soldiers and learn the basics of adventuring in Ragni. A short, friendly introduction quest that opens early progression paths.",
-    prerequisites: [],
-    unlocks: ["Mushroom Man", "Enzan's Brother", "Black Road Assistance"],
-    recommendations: [
-      "Talk to the villagers in Ragni",
-      "Complete King's Recruit to unlock follow-ups",
-      "Check the town noticeboard for side tasks",
-    ],
+export default async function Page({ params }: QuestPageProps) {
+  const { id } = await params;
+  const quest = getQuestById(id);
+
+  if (!quest) {
+    return (
+      <main className="w-full max-w-4xl mx-auto py-10 px-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Quest not found</CardTitle>
+            <CardDescription>
+              No quest exists for the requested progression entry.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </main>
+    );
   }
 
+  const nextQuests = getNextQuests(quest);
+  const prerequisiteQuests = getPrerequisiteQuests(quest);
+
   return (
-    <main className="max-w-4xl mx-auto py-10 px-6">
-      {/* Header */}
+    <main className="w-full max-w-4xl mx-auto py-10 px-6">
       <header className="mb-6">
         <div className="flex items-start justify-between gap-4">
           <div>
             <h1 className="text-2xl font-semibold">{quest.name}</h1>
-            <div className="mt-2 flex items-center gap-2">
+            <div className="mt-2 flex flex-wrap items-center gap-2">
               <Badge variant="secondary">Level {quest.level}</Badge>
               <Badge>{quest.location}</Badge>
+              {quest.tags.map((tag) => (
+                <Badge key={tag} variant="outline" className="capitalize">
+                  {tag}
+                </Badge>
+              ))}
             </div>
           </div>
+          <Button asChild>
+            <Link href={`/journey/${quest.id}`}>View Quest Tree</Link>
+          </Button>
         </div>
       </header>
 
       <div className="space-y-6">
-        {/* Description */}
         <Card>
           <CardHeader>
             <CardTitle>Description</CardTitle>
@@ -58,25 +76,37 @@ export default function Page({ params }: { params: { id: string } }) {
           </CardContent>
         </Card>
 
-        {/* Recommendations */}
         <Card>
           <CardHeader>
             <CardTitle>What should I do next?</CardTitle>
-            <CardDescription>Simple, actionable recommendations</CardDescription>
+            <CardDescription>Quests unlocked by this step</CardDescription>
           </CardHeader>
           <CardContent>
-            <ul className="list-disc pl-5 space-y-2">
-              {quest.recommendations?.map((rec, i) => (
-                <li key={i} className="text-sm">
-                  {rec}
-                </li>
-              ))}
-            </ul>
+            {nextQuests.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                No follow-up quests are currently listed.
+              </p>
+            ) : (
+              <ul className="list-disc pl-5 space-y-2">
+                {nextQuests.map((nextQuest) => (
+                  <li key={nextQuest.id} className="text-sm">
+                    <Link
+                      href={`/quests/${nextQuest.id}`}
+                      className="font-medium underline-offset-4 hover:underline"
+                    >
+                      {nextQuest.name}
+                    </Link>{" "}
+                    <span className="text-muted-foreground">
+                      Level {nextQuest.level}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </CardContent>
         </Card>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Prerequisites */}
           <Card>
             <CardHeader>
               <CardTitle>Prerequisites</CardTitle>
@@ -87,9 +117,14 @@ export default function Page({ params }: { params: { id: string } }) {
                 <p className="text-sm text-muted-foreground">None</p>
               ) : (
                 <ul className="list-disc pl-5 space-y-1">
-                  {quest.prerequisites.map((p, i) => (
-                    <li key={i} className="text-sm">
-                      {p}
+                  {prerequisiteQuests.map((prerequisiteQuest) => (
+                    <li key={prerequisiteQuest.id} className="text-sm">
+                      <Link
+                        href={`/quests/${prerequisiteQuest.id}`}
+                        className="font-medium underline-offset-4 hover:underline"
+                      >
+                        {prerequisiteQuest.name}
+                      </Link>
                     </li>
                   ))}
                 </ul>
@@ -97,43 +132,48 @@ export default function Page({ params }: { params: { id: string } }) {
             </CardContent>
           </Card>
 
-          {/* Unlocks */}
           <Card>
             <CardHeader>
               <CardTitle>Unlocks</CardTitle>
               <CardDescription>Content you gain access to</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex flex-wrap gap-2">
-                {quest.unlocks.map((u, i) => (
-                  <Badge key={i} className="capitalize">
-                    {u}
-                  </Badge>
-                ))}
-              </div>
+              {nextQuests.length === 0 ? (
+                <p className="text-sm text-muted-foreground">None</p>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {nextQuests.map((nextQuest) => (
+                    <Badge key={nextQuest.id} asChild>
+                      <Link href={`/quests/${nextQuest.id}`}>
+                        {nextQuest.name}
+                      </Link>
+                    </Badge>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
 
-        {/* Progression */}
         <Card>
           <CardHeader>
-            <CardTitle>How this fits in progression</CardTitle>
-            <CardDescription>Short context</CardDescription>
+            <CardTitle>Rewards</CardTitle>
+            <CardDescription>Quest completion rewards</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">
-              This early quest introduces you to Ragni's local storylines and opens a
-              few follow-up quests that ease you into leveling and exploring nearby
-              regions.
-            </p>
+            <div className="flex flex-wrap gap-2">
+              {quest.rewards.xp !== undefined && (
+                <Badge variant="secondary">{quest.rewards.xp} XP</Badge>
+              )}
+              {quest.rewards.emeralds !== undefined && (
+                <Badge variant="secondary">
+                  {quest.rewards.emeralds} emeralds
+                </Badge>
+              )}
+            </div>
           </CardContent>
         </Card>
-
-        <div className="flex items-center justify-end">
-          <Button>Explore Connections</Button>
-        </div>
       </div>
     </main>
-  )
+  );
 }
