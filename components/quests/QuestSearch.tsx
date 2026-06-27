@@ -27,7 +27,7 @@ export function QuestSearch({
   return (
     <section className="flex h-full min-h-0 flex-col gap-5">
       <header className="shrink-0">
-        <h1 className="text-sm font-semibold uppercase tracking-[0.26em] text-[#d8b35b]">
+        <h1 className="font-display text-[1rem] font-semibold uppercase tracking-[0.3em] text-[#e0b85e]">
           Search
         </h1>
       </header>

@@ -112,7 +112,7 @@ export function QuestWorkspace({ quests, initialQuestId }: QuestWorkspaceProps) 
           priority
         />
         <div className="min-w-0">
-          <div className="font-serif text-[2.65rem] font-semibold leading-none tracking-[0.18em] text-[#f1c567]">
+          <div className="font-logo text-[2.65rem] font-semibold leading-none tracking-[0.18em] text-[#f1c567]">
             ATLAS
           </div>
           <div className="mt-2 text-sm tracking-[0.22em] text-[#a99462]">
@@ -139,7 +139,7 @@ export function QuestWorkspace({ quests, initialQuestId }: QuestWorkspaceProps) 
 
         <aside className="flex min-h-0 flex-col overflow-y-auto rounded-xl border border-[#5a4322]/38 bg-[linear-gradient(180deg,rgba(29,28,24,0.74),rgba(12,12,10,0.78))] p-5 shadow-[inset_0_1px_0_rgba(243,199,102,0.06),inset_0_-1px_0_rgba(0,0,0,0.22),0_18px_48px_rgba(0,0,0,0.25)] backdrop-blur-md">
           <header className="mb-7 shrink-0 space-y-3 text-center">
-            <h2 className="text-sm font-semibold uppercase tracking-[0.24em] text-[#d8b35b]">
+            <h2 className="font-display text-[1rem] font-semibold uppercase tracking-[0.28em] text-[#e0b85e]">
               Quest Journey
             </h2>
             <p className="mx-auto max-w-xs text-[0.95rem] leading-6 text-[#bfa66f]">

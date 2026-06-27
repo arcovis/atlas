@@ -36,7 +36,7 @@ function Panel({
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <p className="text-[0.68rem] font-medium uppercase tracking-[0.28em] text-[#9d895b]/74">
+    <p className="text-[0.68rem] font-medium uppercase tracking-[0.28em] text-[#9d895b]/70">
       {children}
     </p>
   );
@@ -54,10 +54,10 @@ function RewardBlock({
   accentClassName: string;
 }) {
   return (
-    <div className="space-y-1.5">
+    <div className="space-y-1">
       <div className={`flex items-center gap-3 ${accentClassName}`}>
         <span className="shrink-0 text-[#caa957]">{icon}</span>
-        <span className="text-[1.48rem] font-semibold leading-tight tracking-[-0.01em] text-[#f3ead7]">
+        <span className="font-display text-[1.55rem] font-semibold leading-tight tracking-[-0.01em] text-[#f3ead7]">
           {value}
         </span>
       </div>
@@ -81,10 +81,10 @@ export function QuestDetailsPanel({ quest }: QuestDetailsPanelProps) {
     <article className="space-y-8">
       <header className="space-y-4">
         <div className="space-y-2">
-          <p className="text-[0.72rem] font-semibold uppercase tracking-[0.34em] text-[#caa957]">
+          <p className="font-display text-[1rem] font-semibold uppercase tracking-[0.36em] text-[#e0b85e]">
             Quest Details
           </p>
-          <h1 className="font-serif text-[3rem] font-semibold leading-[1.02] text-[#f1c567]">
+          <h1 className="font-display text-[3rem] font-semibold leading-[1.02] text-[#f1c567]">
             {quest.name}
           </h1>
         </div>
@@ -94,36 +94,36 @@ export function QuestDetailsPanel({ quest }: QuestDetailsPanelProps) {
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,0.35fr)_minmax(0,0.65fr)]">
         <Panel className="space-y-8">
-          <div className="space-y-4">
+          <div className="space-y-3.5">
             <div className="flex items-center gap-2.5">
               <MapPin
                 className="size-4 shrink-0 text-[#caa957]"
                 aria-hidden="true"
               />
-              <p className="text-[1.05rem] font-medium uppercase tracking-[0.22em] text-[#d6b05a]">
+              <p className="text-[1rem] font-medium uppercase tracking-[0.24em] text-[#d6b05a]">
                 Location
               </p>
             </div>
-            <p className="pl-[1.75rem] text-[1.78rem] font-normal leading-tight text-[#f2ead6]">
+            <p className="font-display text-[1.58rem] font-semibold leading-tight text-[#f2ead6]">
               {quest.location}
             </p>
           </div>
 
-          <div className="py-1">
+          <div className="py-2">
             <AtlasDivider />
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3.5">
             <div className="flex items-center gap-2.5">
               <UserRound
                 className="size-4 shrink-0 text-[#caa957]"
                 aria-hidden="true"
               />
-              <p className="text-[1.05rem] font-medium uppercase tracking-[0.22em] text-[#d6b05a]">
+              <p className="text-[1rem] font-medium uppercase tracking-[0.24em] text-[#d6b05a]">
                 Starting NPC
               </p>
             </div>
-            <p className="pl-[1.75rem] text-[1.72rem] font-normal leading-tight text-[#f2ead6]">
+            <p className="font-display text-[1.52rem] font-semibold leading-tight text-[#f2ead6]">
               {quest.starterNpc}
             </p>
           </div>
@@ -131,7 +131,7 @@ export function QuestDetailsPanel({ quest }: QuestDetailsPanelProps) {
 
         <Panel className="space-y-8">
           <div className="space-y-4">
-            <h2 className="text-[1rem] font-semibold uppercase tracking-[0.38em] text-[#e0b85e]">
+            <h2 className="font-display text-[1.12rem] font-semibold uppercase tracking-[0.42em] text-[#e0b85e]">
               Rewards
             </h2>
             <div className="space-y-7">
@@ -146,7 +146,7 @@ export function QuestDetailsPanel({ quest }: QuestDetailsPanelProps) {
                 accentClassName="text-[#9bb9d9]"
               />
 
-              <div className="py-1">
+              <div className="py-2">
                 <AtlasDivider />
               </div>
 
@@ -163,7 +163,7 @@ export function QuestDetailsPanel({ quest }: QuestDetailsPanelProps) {
             </div>
           </div>
 
-          <div className="py-1">
+          <div className="py-2">
             <AtlasDivider />
           </div>
 
