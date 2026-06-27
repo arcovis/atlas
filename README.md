@@ -135,6 +135,4 @@ npm run build
 npm run start
 ```
 
-## License
-
-No license has been added yet.
+<img width="1773" height="934" alt="image" src="https://github.com/user-attachments/assets/740fde4d-5e0c-4353-828e-7a005ca48f43" />
