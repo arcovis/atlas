@@ -1,146 +1,79 @@
 "use client";
 
-import Link from "next/link";
 import { useMemo, useState } from "react";
 
-import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { filterQuests } from "@/lib/search/quests";
 import type { Quest } from "@/types/quest";
 
 type QuestSearchProps = {
   quests: Quest[];
+  selectedQuestId?: string;
+  onSelectQuest?: (questId: string) => void;
 };
 
-function parseLevelFilter(value: string): number | undefined {
-  if (value.trim() === "") {
-    return undefined;
-  }
-
-  const parsedValue = Number(value);
-
-  return Number.isNaN(parsedValue) ? undefined : parsedValue;
-}
-
-export function QuestSearch({ quests }: QuestSearchProps) {
+export function QuestSearch({
+  quests,
+  selectedQuestId,
+  onSelectQuest,
+}: QuestSearchProps) {
   const [query, setQuery] = useState("");
-  const [location, setLocation] = useState("");
-  const [minLevel, setMinLevel] = useState("");
-  const [maxLevel, setMaxLevel] = useState("");
 
   const filteredQuests = useMemo(
-    () =>
-      filterQuests(quests, query, {
-        location,
-        minLevel: parseLevelFilter(minLevel),
-        maxLevel: parseLevelFilter(maxLevel),
-      }),
-    [quests, query, location, minLevel, maxLevel]
+    () => filterQuests(quests, query),
+    [quests, query]
   );
 
   return (
-    <main className="w-full max-w-5xl mx-auto px-6 py-10">
-      <header className="mb-8 space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight">Quest Search</h1>
-        <p className="max-w-2xl text-sm text-muted-foreground">
-          Find Wynncraft quests by name, location, and progression level.
-        </p>
+    <section className="flex h-full min-h-0 flex-col gap-5">
+      <header className="shrink-0">
+        <h1 className="text-sm font-semibold uppercase tracking-[0.26em] text-[#d8b35b]">
+          Search
+        </h1>
       </header>
 
-      <section className="mb-8 grid gap-4 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_9rem_9rem]">
-        <div className="space-y-2">
-          <label className="text-sm font-medium" htmlFor="quest-search">
-            Quest name
-          </label>
-          <Input
-            id="quest-search"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search by name"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-sm font-medium" htmlFor="quest-location">
-            Location
-          </label>
-          <Input
-            id="quest-location"
-            value={location}
-            onChange={(event) => setLocation(event.target.value)}
-            placeholder="Any location"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-sm font-medium" htmlFor="quest-min-level">
-            Min level
-          </label>
-          <Input
-            id="quest-min-level"
-            type="number"
-            min={1}
-            value={minLevel}
-            onChange={(event) => setMinLevel(event.target.value)}
-            placeholder="1"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-sm font-medium" htmlFor="quest-max-level">
-            Max level
-          </label>
-          <Input
-            id="quest-max-level"
-            type="number"
-            min={1}
-            value={maxLevel}
-            onChange={(event) => setMaxLevel(event.target.value)}
-            placeholder="106"
-          />
-        </div>
-      </section>
+      <Input
+        id="quest-search"
+        value={query}
+        onChange={(event) => setQuery(event.target.value)}
+        placeholder="Search for a quest..."
+        className="h-12 shrink-0 border-[#6b4f25]/42 bg-[#0d0d0a]/72 px-4 text-[#f2ead6] shadow-[inset_0_1px_8px_rgba(0,0,0,0.2)] placeholder:text-[#8f7953]/82 transition-all duration-200 focus-visible:border-[#d8b35b]/88 focus-visible:ring-[#d8b35b]/22 focus-visible:shadow-[inset_0_1px_8px_rgba(0,0,0,0.22),0_0_20px_rgba(216,179,91,0.11)]"
+      />
 
       {filteredQuests.length === 0 ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>No quests found</CardTitle>
-            <CardDescription>
-              Try adjusting the search text, location, or level range.
-            </CardDescription>
-          </CardHeader>
-        </Card>
+        <div className="rounded-xl bg-[rgba(22,20,16,0.5)] p-5 text-sm text-[#bfa66f]">
+          No quests found.
+        </div>
       ) : (
-        <section className="grid gap-4">
+        <section className="grid min-h-0 gap-4 overflow-y-auto pr-1">
           {filteredQuests.map((quest) => (
-            <Link key={quest.id} href={`/quests/${quest.id}`}>
-              <Card className="transition-colors hover:bg-muted/40">
-                <CardHeader>
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div className="space-y-1">
-                      <CardTitle>{quest.name}</CardTitle>
-                      <CardDescription>{quest.location}</CardDescription>
-                    </div>
-                    <Badge variant="secondary">Level {quest.level}</Badge>
+            <button
+              key={quest.id}
+              type="button"
+              className={
+                quest.id === selectedQuestId
+                  ? "block rounded-xl border border-[#6fbf3f]/85 bg-[linear-gradient(135deg,rgba(39,78,29,0.86),rgba(17,38,17,0.82))] p-4 text-left shadow-[inset_0_1px_0_rgba(165,220,112,0.1),0_12px_28px_rgba(75,143,47,0.16)] transition-all duration-200 ease-out hover:-translate-y-px hover:border-[#84d757]/90"
+                  : "block rounded-xl border border-[#5a4322]/24 bg-[rgba(22,20,16,0.48)] p-4 text-left shadow-[0_8px_22px_rgba(0,0,0,0.1)] transition-all duration-200 ease-out hover:-translate-y-px hover:border-[#8a6a32]/52 hover:bg-[rgba(31,28,20,0.66)] hover:shadow-[0_14px_28px_rgba(0,0,0,0.18)]"
+              }
+              onClick={() => onSelectQuest?.(quest.id)}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="truncate font-medium text-[#f2ead6]/95">
+                    {quest.name}
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">
-                    {quest.description}
-                  </p>
-                </CardContent>
-              </Card>
-            </Link>
+                  <div className="mt-1.5 truncate text-sm text-[#bfa66f]">
+                    {quest.location}
+                  </div>
+                </div>
+                <div className="shrink-0 text-sm font-semibold text-[#d8b35b]">
+                  Lv. {quest.combatLevel}
+                </div>
+              </div>
+            </button>
           ))}
         </section>
       )}
-    </main>
+    </section>
   );
 }

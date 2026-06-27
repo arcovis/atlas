@@ -28,7 +28,27 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="relative flex h-dvh flex-col overflow-hidden bg-[#050706]">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none fixed inset-0 z-0"
+          style={{
+            backgroundImage: "url('/images/background.png')",
+            backgroundRepeat: "repeat",
+            backgroundPosition: "center center",
+            backgroundSize: "640px 640px",
+            backgroundAttachment: "fixed",
+            filter: "brightness(1.08) contrast(1.04) saturate(1.03)",
+          }}
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none fixed inset-0 z-10 bg-[radial-gradient(circle_at_50%_42%,rgba(69,76,39,0.18),transparent_36%),radial-gradient(circle_at_center,transparent_42%,rgba(0,0,0,0.48)_100%),linear-gradient(180deg,rgba(5,7,6,0.34),rgba(5,7,6,0.30))]"
+        />
+        <div className="relative z-20 flex h-full min-h-0 flex-col">
+          {children}
+        </div>
+      </body>
     </html>
   );
 }

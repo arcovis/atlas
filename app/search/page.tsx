@@ -1,6 +1,6 @@
-import { QuestSearch } from "@/components/quests/QuestSearch";
+import { QuestWorkspace } from "@/components/quests/QuestWorkspace";
 import { quests } from "@/lib/data/quests";
 
 export default function SearchPage() {
-  return <QuestSearch quests={quests} />;
+  return <QuestWorkspace quests={quests} />;
 }

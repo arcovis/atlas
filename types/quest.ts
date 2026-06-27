@@ -1,20 +1,24 @@
 export type QuestId = string;
 
-export type QuestTag = "main" | "side" | "dungeon-related";
+export type QuestLength = "Short" | "Medium" | "Long";
+
+export type QuestDifficulty = "Easy" | "Medium" | "Hard";
 
 export interface QuestRewards {
   xp?: number;
   emeralds?: number;
+  items?: string[];
 }
 
 export interface Quest {
   id: QuestId;
   name: string;
-  level: number;
+  length: QuestLength;
+  difficulty: QuestDifficulty;
   location: string;
-  description: string;
+  combatLevel: number;
+  starterNpc: string;
   prerequisites: QuestId[];
   unlocks: QuestId[];
   rewards: QuestRewards;
-  tags: QuestTag[];
 }

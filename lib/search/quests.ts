@@ -2,8 +2,8 @@ import type { Quest } from "@/types/quest";
 
 export type QuestSearchFilters = {
   location?: string;
-  minLevel?: number;
-  maxLevel?: number;
+  minCombatLevel?: number;
+  maxCombatLevel?: number;
 };
 
 export function filterQuests(
@@ -23,14 +23,19 @@ export function filterQuests(
       normalizedLocation.length === 0 ||
       quest.location.toLowerCase().includes(normalizedLocation);
 
-    const matchesMinLevel =
-      filters.minLevel === undefined || quest.level >= filters.minLevel;
+    const matchesMinCombatLevel =
+      filters.minCombatLevel === undefined ||
+      quest.combatLevel >= filters.minCombatLevel;
 
-    const matchesMaxLevel =
-      filters.maxLevel === undefined || quest.level <= filters.maxLevel;
+    const matchesMaxCombatLevel =
+      filters.maxCombatLevel === undefined ||
+      quest.combatLevel <= filters.maxCombatLevel;
 
     return (
-      matchesName && matchesLocation && matchesMinLevel && matchesMaxLevel
+      matchesName &&
+      matchesLocation &&
+      matchesMinCombatLevel &&
+      matchesMaxCombatLevel
     );
   });
 }
