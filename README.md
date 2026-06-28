@@ -135,4 +135,7 @@ npm run build
 npm run start
 ```
 
-<img width="1773" height="934" alt="image" src="https://github.com/user-attachments/assets/740fde4d-5e0c-4353-828e-7a005ca48f43" />
+## Screenshots
+
+<img width="1781" height="939" alt="image" src="https://github.com/user-attachments/assets/b837bd06-fd3a-4776-9323-8f7c02175c24" />
+
