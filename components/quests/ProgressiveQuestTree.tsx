@@ -2,34 +2,28 @@
 
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { useMemo, useState } from "react";
+import type { ReactNode } from "react";
 
-import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { getNextQuests, type QuestTreeNode } from "@/lib/quests";
+import { getNextQuests, getPrerequisiteQuests } from "@/lib/quests";
 import type { Quest } from "@/types/quest";
 
-const MAX_QUEST_TREE_DEPTH = 6;
+const MAX_VISIBLE_DEPTH = 6;
 
 type ProgressiveQuestTreeProps = {
-  node: QuestTreeNode;
-  selectedQuestId?: string;
+  quest: Quest;
   onSelectQuest?: (questId: string) => void;
 };
 
-type QuestTreeNodeViewProps = {
+type QuestNodeProps = {
   quest: Quest;
   depth: number;
   path: string[];
-  selectedQuestId?: string;
+  expandedQuestIds: Set<string>;
+  onToggleQuest: (questId: string) => void;
   onSelectQuest?: (questId: string) => void;
 };
 
-function getAvailableChildren(quest: Quest, path: string[]): Quest[] {
+function getVisibleChildren(quest: Quest, path: string[]) {
   const visitedQuestIds = new Set(path);
 
   return getNextQuests(quest).filter(
@@ -37,117 +31,123 @@ function getAvailableChildren(quest: Quest, path: string[]): Quest[] {
   );
 }
 
-function QuestTreeNodeView({
+function RoadmapSection({
+  label,
+  children,
+}: {
+  label: string;
+  children: ReactNode;
+}) {
+  return (
+    <section className="space-y-4">
+      <h3 className="text-[0.68rem] font-semibold uppercase tracking-[0.28em] text-[#9d895b]/82">
+        {label}
+      </h3>
+      {children}
+    </section>
+  );
+}
+
+function QuestButton({
+  quest,
+  isCurrent = false,
+  onSelectQuest,
+}: {
+  quest: Quest;
+  isCurrent?: boolean;
+  onSelectQuest?: (questId: string) => void;
+}) {
+  return (
+    <button
+      type="button"
+      className={
+        isCurrent
+          ? "relative w-full overflow-hidden rounded-2xl border border-[#6fbf3f]/78 bg-[radial-gradient(circle_at_84%_18%,rgba(130,215,87,0.16),transparent_34%),linear-gradient(135deg,rgba(39,78,29,0.9),rgba(17,38,17,0.86))] px-5 py-4 text-left text-[#f2ead6] shadow-[inset_0_1px_0_rgba(165,220,112,0.12),0_0_26px_rgba(75,143,47,0.14),0_16px_34px_rgba(0,0,0,0.22)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#84d757]/88"
+          : "w-full rounded-xl border border-[#5a4322]/26 bg-[linear-gradient(180deg,rgba(22,20,16,0.56),rgba(13,12,10,0.62))] px-4 py-3 text-left text-[#f2ead6] shadow-[0_8px_22px_rgba(0,0,0,0.1)] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#8a6a32]/56 hover:bg-[rgba(31,28,20,0.72)] hover:shadow-[0_12px_26px_rgba(0,0,0,0.18)]"
+      }
+      onClick={() => onSelectQuest?.(quest.id)}
+    >
+      <span
+        className={
+          isCurrent
+            ? "block text-[1.05rem] font-semibold leading-6"
+            : "block text-[0.92rem] font-medium leading-6 text-[#f2ead6]/92"
+        }
+      >
+        {quest.name}
+      </span>
+      <span className="mt-1 block text-xs text-[#bfa66f]/88">
+        Lv. {quest.combatLevel}
+      </span>
+    </button>
+  );
+}
+
+function ExpandableQuestNode({
   quest,
   depth,
   path,
-  selectedQuestId,
+  expandedQuestIds,
+  onToggleQuest,
   onSelectQuest,
-}: QuestTreeNodeViewProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const children = useMemo(() => getAvailableChildren(quest, path), [quest, path]);
-  const canRenderChildren = depth < MAX_QUEST_TREE_DEPTH;
+}: QuestNodeProps) {
+  const children = useMemo(() => getVisibleChildren(quest, path), [quest, path]);
   const hasChildren = children.length > 0;
-  const isExpandable = hasChildren;
-  const shouldShowChildren = isExpanded && canRenderChildren && hasChildren;
+  const isExpanded = expandedQuestIds.has(quest.id);
+  const canRenderChildren = depth < MAX_VISIBLE_DEPTH;
+  const shouldShowChildren = hasChildren && canRenderChildren && isExpanded;
   const shouldShowDepthPlaceholder =
-    isExpanded && !canRenderChildren && hasChildren;
+    hasChildren && !canRenderChildren && isExpanded;
 
   return (
-    <div className="space-y-7">
-      <Card
-        className={
-          depth === 1
-            ? "mx-auto w-full max-w-[19rem] border-[#6fbf3f]/80 bg-[linear-gradient(135deg,rgba(39,78,29,0.9),rgba(17,38,17,0.86))] py-3.5 text-[#f2ead6] shadow-[inset_0_1px_0_rgba(165,220,112,0.1),0_14px_32px_rgba(75,143,47,0.16)] ring-0 transition-all duration-200"
-            : quest.id === selectedQuestId
-              ? "mx-auto w-full max-w-[19rem] border-[#6fbf3f]/78 bg-[rgba(22,20,16,0.76)] py-3.5 text-[#f2ead6] shadow-[0_12px_26px_rgba(75,143,47,0.13)] ring-0 transition-all duration-200"
-              : "mx-auto w-full max-w-[19rem] border-[#5a4322]/38 bg-[rgba(22,20,16,0.62)] py-3.5 text-[#f2ead6] shadow-[0_10px_24px_rgba(0,0,0,0.14)] transition-all duration-200 hover:-translate-y-px hover:border-[#8a6a32]/64 hover:bg-[rgba(31,28,20,0.76)] hover:shadow-[0_14px_30px_rgba(0,0,0,0.2)]"
-        }
-      >
-        <CardHeader className="px-4">
-          <div className="flex items-start justify-between gap-3">
-            <button
-              type="button"
-              className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-sm text-[#bfa66f] outline-none transition-colors duration-200 hover:text-[#e2bd63] focus-visible:ring-3 focus-visible:ring-[#6b4f25]/40 disabled:opacity-0"
-              aria-expanded={isExpandable ? isExpanded : undefined}
-              disabled={!isExpandable}
-              onClick={() => {
-                if (isExpandable) {
-                  setIsExpanded((currentValue) => !currentValue);
-                }
-              }}
-            >
-              {isExpandable ? (
-                isExpanded ? (
-                  <ChevronDown className="size-4" aria-hidden="true" />
-                ) : (
-                  <ChevronRight className="size-4" aria-hidden="true" />
-                )
-              ) : null}
-            </button>
-            <button
-              type="button"
-              className="min-w-0 flex-1 space-y-1.5 text-left outline-none focus-visible:rounded-sm focus-visible:ring-3 focus-visible:ring-[#6b4f25]/40"
-              onClick={() => onSelectQuest?.(quest.id)}
-            >
-              <CardTitle className="text-[0.95rem] text-[#f2ead6]/95">
-                {quest.name}
-              </CardTitle>
-              <CardDescription className="text-xs text-[#bfa66f]">
-                Lv. {quest.combatLevel}
-              </CardDescription>
-            </button>
-          </div>
-        </CardHeader>
-      </Card>
+    <div className="animate-in fade-in slide-in-from-top-1 duration-300">
+      <div className="flex gap-3">
+        <button
+          type="button"
+          className="mt-3 flex size-7 shrink-0 items-center justify-center rounded-full border border-[#8a6a32]/34 bg-[rgba(14,13,10,0.72)] text-[#bfa66f] shadow-[inset_0_1px_0_rgba(243,199,102,0.04)] transition-all duration-200 hover:border-[#d8b35b]/48 hover:bg-[rgba(31,28,20,0.76)] hover:text-[#e2bd63] disabled:border-transparent disabled:bg-transparent disabled:opacity-0 disabled:shadow-none"
+          aria-expanded={hasChildren ? isExpanded : undefined}
+          disabled={!hasChildren}
+          onClick={() => onToggleQuest(quest.id)}
+        >
+          {hasChildren ? (
+            isExpanded ? (
+              <ChevronDown className="size-4" aria-hidden="true" />
+            ) : (
+              <ChevronRight className="size-4" aria-hidden="true" />
+            )
+          ) : null}
+        </button>
+        <QuestButton quest={quest} onSelectQuest={onSelectQuest} />
+      </div>
 
       {(shouldShowChildren || shouldShowDepthPlaceholder) && (
-        <div className="border-l border-[#4b8f2f]/62 pl-5 md:pl-7">
-          <div className="space-y-7">
+        <div className="relative ml-[0.85rem] mt-4 pl-8">
+          <div
+            aria-hidden="true"
+            className="absolute left-0 top-0 h-full w-5 rounded-bl-3xl border-b-2 border-l-2 border-[#6f8f45]/42"
+          />
+          <div className="space-y-4">
             {shouldShowChildren &&
               children.map((childQuest) => (
-                <div key={childQuest.id} className="relative">
-                  <div className="absolute -left-5 top-8 h-px w-5 bg-[#4b8f2f]/62 md:-left-7 md:w-7" />
-                  <QuestTreeNodeView
-                    quest={childQuest}
-                    depth={depth + 1}
-                    path={[...path, childQuest.id]}
-                    selectedQuestId={selectedQuestId}
-                    onSelectQuest={onSelectQuest}
-                  />
-                </div>
+                <ExpandableQuestNode
+                  key={childQuest.id}
+                  quest={childQuest}
+                  depth={depth + 1}
+                  path={[...path, childQuest.id]}
+                  expandedQuestIds={expandedQuestIds}
+                  onToggleQuest={onToggleQuest}
+                  onSelectQuest={onSelectQuest}
+                />
               ))}
 
             {shouldShowDepthPlaceholder && (
-              <div className="relative">
-                <div className="absolute -left-5 top-8 h-px w-5 bg-[#4b8f2f]/62 md:-left-7 md:w-7" />
-                <button
-                  type="button"
-                  className="block w-full text-left"
-                  onClick={() => onSelectQuest?.(quest.id)}
-                >
-                  <Card className="mx-auto w-full max-w-[19rem] border-dashed border-[#5a4322]/48 bg-[rgba(22,20,16,0.58)] py-3.5 text-[#f2ead6] transition-all duration-200 hover:-translate-y-px hover:border-[#8a6a32]/68">
-                    <CardHeader>
-                      <div className="flex flex-wrap items-start justify-between gap-3">
-                        <div className="space-y-1">
-                          <CardTitle className="text-sm text-[#f3c766]">
-                            View more
-                          </CardTitle>
-                          <CardDescription className="text-xs text-[#c6aa78]">
-                            Continue the tree from {quest.name}
-                          </CardDescription>
-                        </div>
-                        <Badge
-                          variant="outline"
-                          className="border-[#6b4f25] text-[#c6aa78]"
-                        >
-                          Depth limit
-                        </Badge>
-                      </div>
-                    </CardHeader>
-                  </Card>
-                </button>
-              </div>
+              <button
+                type="button"
+                className="animate-in fade-in slide-in-from-top-1 duration-300 w-full rounded-xl border border-dashed border-[#8a6a32]/42 bg-[rgba(22,20,16,0.54)] px-4 py-3 text-left text-sm text-[#f3c766] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#d8b35b]/62 hover:bg-[rgba(31,28,20,0.68)]"
+                onClick={() => onSelectQuest?.(quest.id)}
+              >
+                View more
+              </button>
             )}
           </div>
         </div>
@@ -157,19 +157,76 @@ function QuestTreeNodeView({
 }
 
 export function ProgressiveQuestTree({
-  node,
-  selectedQuestId,
+  quest,
   onSelectQuest,
 }: ProgressiveQuestTreeProps) {
+  const [expandedQuestIds, setExpandedQuestIds] = useState<Set<string>>(
+    () => new Set()
+  );
+  const previousQuests = getPrerequisiteQuests(quest);
+  const nextQuests = getNextQuests(quest);
+
+  function handleToggleQuest(questId: string) {
+    setExpandedQuestIds((currentQuestIds) => {
+      const nextQuestIds = new Set(currentQuestIds);
+
+      if (nextQuestIds.has(questId)) {
+        nextQuestIds.delete(questId);
+      } else {
+        nextQuestIds.add(questId);
+      }
+
+      return nextQuestIds;
+    });
+  }
+
   return (
-    <div className="mx-auto w-full max-w-md">
-      <QuestTreeNodeView
-        quest={node.quest}
-        depth={1}
-        path={[node.quest.id]}
-        selectedQuestId={selectedQuestId}
-        onSelectQuest={onSelectQuest}
+    <div className="relative w-full space-y-9">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute left-1/2 top-[34%] size-40 -translate-x-1/2 rounded-full border border-[#d8b35b]/5 opacity-80"
       />
+      <RoadmapSection label="Previous">
+        {previousQuests.length > 0 ? (
+          <div className="space-y-4">
+            {previousQuests.map((previousQuest) => (
+              <QuestButton
+                key={previousQuest.id}
+                quest={previousQuest}
+                onSelectQuest={onSelectQuest}
+              />
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm leading-6 text-[#8f7953]">No prerequisites.</p>
+        )}
+      </RoadmapSection>
+
+      <RoadmapSection label="Current">
+        <QuestButton quest={quest} isCurrent onSelectQuest={onSelectQuest} />
+      </RoadmapSection>
+
+      <RoadmapSection label="Next">
+        {nextQuests.length > 0 ? (
+          <div className="space-y-4">
+            {nextQuests.map((nextQuest) => (
+              <ExpandableQuestNode
+                key={nextQuest.id}
+                quest={nextQuest}
+                depth={2}
+                path={[quest.id, nextQuest.id]}
+                expandedQuestIds={expandedQuestIds}
+                onToggleQuest={handleToggleQuest}
+                onSelectQuest={onSelectQuest}
+              />
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm leading-6 text-[#8f7953]">
+            No direct unlocks.
+          </p>
+        )}
+      </RoadmapSection>
     </div>
   );
 }

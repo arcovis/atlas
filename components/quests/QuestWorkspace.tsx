@@ -12,7 +12,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { buildQuestTree } from "@/lib/quests";
 import type { Quest } from "@/types/quest";
 
 type QuestWorkspaceProps = {
@@ -40,8 +39,6 @@ export function QuestWorkspace({ quests, initialQuestId }: QuestWorkspaceProps) 
 
   const selectedQuest =
     selectedQuestId !== undefined ? questById.get(selectedQuestId) : undefined;
-  const questTree =
-    selectedQuestId !== undefined ? buildQuestTree(selectedQuestId, 0) : undefined;
 
   useEffect(() => {
     if (!selectedQuest && fallbackQuestId !== undefined) {
@@ -85,7 +82,7 @@ export function QuestWorkspace({ quests, initialQuestId }: QuestWorkspaceProps) 
     }
   }
 
-  if (!selectedQuest || !questTree) {
+  if (!selectedQuest) {
     return (
       <main className="flex h-full w-full items-start overflow-hidden p-5 text-[#f2ead6]">
         <Card className="border-[#5a4322]/55 bg-[linear-gradient(180deg,rgba(24,24,22,0.78),rgba(12,12,11,0.82))] text-[#f2ead6] shadow-[inset_0_1px_0_rgba(243,199,102,0.06),0_18px_50px_rgba(0,0,0,0.34)] backdrop-blur-md">
@@ -137,20 +134,27 @@ export function QuestWorkspace({ quests, initialQuestId }: QuestWorkspaceProps) 
           />
         </section>
 
-        <aside className="flex min-h-0 flex-col overflow-y-auto rounded-xl border border-[#5a4322]/38 bg-[linear-gradient(180deg,rgba(29,28,24,0.74),rgba(12,12,10,0.78))] p-5 shadow-[inset_0_1px_0_rgba(243,199,102,0.06),inset_0_-1px_0_rgba(0,0,0,0.22),0_18px_48px_rgba(0,0,0,0.25)] backdrop-blur-md">
-          <header className="mb-7 shrink-0 space-y-3 text-center">
-            <h2 className="font-display text-[1rem] font-semibold uppercase tracking-[0.28em] text-[#e0b85e]">
-              Quest Journey
+        <aside className="flex min-h-0 flex-col overflow-y-auto rounded-xl border border-[#5a4322]/34 bg-[radial-gradient(circle_at_50%_18%,rgba(71,91,42,0.14),transparent_34%),linear-gradient(180deg,rgba(31,30,25,0.72),rgba(12,12,10,0.78))] p-5 shadow-[inset_0_1px_0_rgba(243,199,102,0.055),inset_0_-1px_0_rgba(0,0,0,0.22),0_18px_48px_rgba(0,0,0,0.24)] backdrop-blur-md">
+          <header className="mb-8 shrink-0 space-y-4 text-center">
+            <h2 className="font-display text-[1.12rem] font-semibold uppercase tracking-[0.34em] text-[#e0b85e]">
+              Journey
             </h2>
-            <p className="mx-auto max-w-xs text-[0.95rem] leading-6 text-[#bfa66f]">
-              Explore the questline and see where it leads...
+            <div
+              aria-hidden="true"
+              className="mx-auto flex max-w-[11rem] items-center gap-3 text-[#8a6a32]/70"
+            >
+              <span className="h-px flex-1 bg-current" />
+              <span className="size-2 rotate-45 border border-current" />
+              <span className="h-px flex-1 bg-current" />
+            </div>
+            <p className="mx-auto max-w-xs text-[0.9rem] leading-6 text-[#bfa66f]/78">
+              Explore where this quest leads.
             </p>
           </header>
           <div className="flex min-h-[20rem] flex-1 items-center">
             <ProgressiveQuestTree
               key={selectedQuest.id}
-              node={questTree}
-              selectedQuestId={selectedQuest.id}
+              quest={selectedQuest}
               onSelectQuest={handleSelectQuest}
             />
           </div>
